@@ -1,4 +1,4 @@
-package com.lulumedic.advance.v0;
+package com.lulumedic.advance.app.v0;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
