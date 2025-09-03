@@ -6,18 +6,18 @@ import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j
-public class FieldLogTrace implements LogTrace {
+public class ThreadLocalLogTrace implements LogTrace {
 
     private static final String START_PREFIX = "-->";
     private static final String COMPLETE_PREFIX = "<--";
     private static final String EX_PREFIX = "<X-";
 
-    private TraceId traceHolder;
+    private ThreadLocal<TraceId> traceHolder = new ThreadLocal<>();
 
     @Override
     public TraceStatus begin(String message) {
         syncTraceId();
-        TraceId traceId = traceHolder;
+        TraceId traceId = traceHolder.get();
         Long startTimeMs = System.currentTimeMillis();
         log.info("[{}] {}{}", traceId.getId(), addSpace(START_PREFIX, traceId.getLevel()), message);
         return new TraceStatus(traceId, startTimeMs, message);
@@ -34,10 +34,11 @@ public class FieldLogTrace implements LogTrace {
     }
 
     private void syncTraceId() {
-        if(traceHolder == null) {
-            traceHolder = new TraceId();
+        TraceId traceId = traceHolder.get();
+        if(traceId == null) {
+            traceHolder.set(new TraceId());
         } else {
-            traceHolder = traceHolder.createNextId();
+            traceHolder.set(traceId.createNextId());
         }
     }
 
@@ -55,10 +56,11 @@ public class FieldLogTrace implements LogTrace {
     }
 
     private void releaseTraceId() {
-        if(traceHolder.isFirstLevel()) {
-            traceHolder = null; // destroy
+        TraceId traceId = traceHolder.get();
+        if(traceId.isFirstLevel()) {
+            traceHolder.remove(); // destroy
         } else {
-            traceHolder = traceHolder.createPreviousId();
+            traceHolder.set(traceId.createPreviousId());
         }
     }
 
