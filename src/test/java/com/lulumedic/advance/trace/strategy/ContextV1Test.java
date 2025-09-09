@@ -1,6 +1,7 @@
 package com.lulumedic.advance.trace.strategy;
 
 import com.lulumedic.advance.trace.strategy.code.strategy.ContextV1;
+import com.lulumedic.advance.trace.strategy.code.strategy.Strategy;
 import com.lulumedic.advance.trace.strategy.code.strategy.StrategyLogic1;
 import com.lulumedic.advance.trace.strategy.code.strategy.StrategyLogic2;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +50,64 @@ public class ContextV1Test {
         StrategyLogic2 strategyLogic2 = new StrategyLogic2();
         ContextV1 context2 = new ContextV1(strategyLogic2);
         context2.execute();
+    }
+
+    @Test
+    void strategyV2Test() {
+        Strategy logic1 = new Strategy() {
+
+            @Override
+            public void call() {
+                log.info("비지니스 로직 1 실행");
+            }
+        };
+
+        ContextV1 contextV1 = new ContextV1(logic1);
+        contextV1.execute();
+        log.info("logic1 class = {}", logic1.getClass());
+
+        Strategy logic2 = new Strategy() {
+
+            @Override
+            public void call() {
+                log.info("비지니스 로직 2 실행");
+            }
+        };
+
+        ContextV1 contextV2 = new ContextV1(logic2);
+        contextV2.execute();
+        log.info("logic2 class = {}", logic2.getClass());
+    }
+
+    @Test
+    void strategyV3Test() {
+        ContextV1 contextV1 = new ContextV1(new Strategy() {
+
+            @Override
+            public void call() {
+                log.info("비지니스 로직 1 실행");
+            }
+        });
+        contextV1.execute();
+
+        ContextV1 contextV2 = new ContextV1(new Strategy() {
+
+            @Override
+            public void call() {
+                log.info("비지니스 로직 2 실행");
+            }
+        });
+        contextV2.execute();
+
+    }
+
+    @Test
+    void strategyV4Test() {
+        ContextV1 contextV1 = new ContextV1(() -> log.info("비지니스 로직 1 실행"));
+        contextV1.execute();
+
+        ContextV1 contextV2 = new ContextV1(() -> log.info("비지니스 로직 2 실행"));
+        contextV2.execute();
     }
 
 }
